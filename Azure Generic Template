@@ -1,0 +1,92 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "iotHubName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of IoT Hub"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources"
+            }
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "F1",
+            "allowedValues": ["F1", "S1", "S2", "S3"],
+            "metadata": {
+                "description": "IoT Hub SKU"
+            }
+        }
+    },
+    "variables": {
+        "storageAccountName": "[concat('storage', uniqueString(resourceGroup().id))]",
+        "dpsName": "[concat(parameters('iotHubName'), '-dps')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Devices/IotHubs",
+            "apiVersion": "2021-07-02",
+            "name": "[parameters('iotHubName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('sku')]",
+                "capacity": 1
+            },
+            "properties": {
+                "eventHubEndpoints": {
+                    "events": {
+                        "retentionTimeInDays": 1,
+                        "partitionCount": 4
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-08-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2"
+        },
+        {
+            "type": "Microsoft.Devices/provisioningServices",
+            "apiVersion": "2021-10-01",
+            "name": "[variables('dpsName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "F1",
+                "capacity": 1
+            },
+            "properties": {
+                "iotHubs": [
+                    {
+                        "connectionString": "[concat('HostName=', parameters('iotHubName'), '.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=', listKeys(resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName')), '2021-07-02').value[0].primaryKey)]",
+                        "location": "[parameters('location')]"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]"
+            ]
+        }
+    ],
+    "outputs": {
+        "iotHubConnectionString": {
+            "type": "string",
+            "value": "[concat('HostName=', parameters('iotHubName'), '.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=', listKeys(resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName')), '2021-07-02').value[0].primaryKey)]"
+        },
+        "storageAccountConnectionString": {
+            "type": "string",
+            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-08-01').keys[0].value)]"
+        }
+    }
+}
