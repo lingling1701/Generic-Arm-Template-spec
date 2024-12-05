@@ -1,92 +1,109 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
+    "contentVersion": "1.0.0.2",
     "parameters": {
-        "iotHubName": {
+        "projectName": {
             "type": "string",
+            "defaultValue": "vsCodeIoTProject",
             "metadata": {
-                "description": "Name of IoT Hub"
+                "description": "Base name for Azure resources (max 24 chars, alphanumeric only)"
+            },
+            "maxLength": 24,
+            "minLength": 3
+        },
+        "iotHubLocation": {
+            "type": "string",
+            "defaultValue": "westeurope",
+            "metadata": {
+                "description": "Location for IoT Hub"
             }
         },
-        "location": {
-            "type": "string",
-            "defaultValue": "[resourceGroup().location]",
-            "metadata": {
-                "description": "Location for all resources"
-            }
-        },
-        "sku": {
+        "iotHubSku": {
             "type": "string",
             "defaultValue": "F1",
-            "allowedValues": ["F1", "S1", "S2", "S3"],
+            "allowedValues": [
+                "F1",
+                "S1",
+                "S2",
+                "S3"
+            ],
             "metadata": {
-                "description": "IoT Hub SKU"
+                "description": "SKU for IoT Hub"
+            }
+        },
+        "deviceName": {
+            "type": "string",
+            "defaultValue": "VSCodeDevice",
+            "maxLength": 128,
+            "metadata": {
+                "description": "Name of the IoT device"
             }
         }
     },
     "variables": {
-        "storageAccountName": "[concat('st', substring(uniqueString(resourceGroup().id), 0, 22))]",
-    "dpsName": "[concat(parameters('iotHubName'), '-dps')]"
+        "sanitizedProjectName": "[toLower(replace(parameters('projectName'), ' ', ''))]",
+        "iotHubName": "[substring(concat(variables('sanitizedProjectName'), 'hub', uniqueString(resourceGroup().id)), 0, 24)]",
+        "storageAccountName": "[substring(concat(variables('sanitizedProjectName'), 'store', uniqueString(resourceGroup().id)), 0, 24)]",
+        "consumerGroupName": "[concat('consumergroup', uniqueString(resourceGroup().id))]"
     },
     "resources": [
         {
-            "type": "Microsoft.Devices/IotHubs",
-            "apiVersion": "2021-07-02",
-            "name": "[parameters('iotHubName')]",
-            "location": "[parameters('location')]",
-            "sku": {
-                "name": "[parameters('sku')]",
-                "capacity": 1
-            },
-            "properties": {
-                "eventHubEndpoints": {
-                    "events": {
-                        "retentionTimeInDays": 1,
-                        "partitionCount": 4
-                    }
-                }
-            }
-        },
-        {
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2021-08-01",
+            "apiVersion": "2021-04-01",
             "name": "[variables('storageAccountName')]",
-            "location": "[parameters('location')]",
+            "location": "[parameters('iotHubLocation')]",
             "sku": {
                 "name": "Standard_LRS"
             },
             "kind": "StorageV2"
         },
         {
-            "type": "Microsoft.Devices/provisioningServices",
-            "apiVersion": "2021-10-01",
-            "name": "[variables('dpsName')]",
-            "location": "[parameters('location')]",
+            "type": "Microsoft.Devices/IotHubs",
+            "apiVersion": "2021-03-31",
+            "name": "[variables('iotHubName')]",
+            "location": "[parameters('iotHubLocation')]",
             "sku": {
-                "name": "F1",
+                "name": "[parameters('iotHubSku')]",
                 "capacity": 1
             },
             "properties": {
-                "iotHubs": [
-                    {
-                        "connectionString": "[concat('HostName=', parameters('iotHubName'), '.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=', listKeys(resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName')), '2021-07-02').value[0].primaryKey)]",
-                        "location": "[parameters('location')]"
+                "eventHubEndpoints": {
+                    "events": {
+                        "retentionTimeInDays": 1,
+                        "partitionCount": 2
                     }
-                ]
-            },
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Devices/IotHubs/eventHubEndpoints/ConsumerGroups",
+            "apiVersion": "2021-03-31",
+            "name": "[concat(variables('iotHubName'), '/events/', variables('consumerGroupName'))]",
             "dependsOn": [
-                "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]"
+                "[resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Devices/iothubs/devices",
+            "apiVersion": "2021-03-31",
+            "name": "[concat(variables('iotHubName'), '/', parameters('deviceName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Devices/iothubs', variables('iotHubName'))]"
             ]
         }
     ],
     "outputs": {
-        "iotHubConnectionString": {
+        "iotHubName": {
             "type": "string",
-            "value": "[concat('HostName=', parameters('iotHubName'), '.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=', listKeys(resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName')), '2021-07-02').value[0].primaryKey)]"
+            "value": "[variables('iotHubName')]"
         },
-        "storageAccountConnectionString": {
+        "iotHubHostName": {
             "type": "string",
-            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-08-01').keys[0].value)]"
+            "value": "[reference(resourceId('Microsoft.Devices/iothubs', variables('iotHubName'))).hostName]"
+        },
+        "storageAccountName": {
+            "type": "string", 
+            "value": "[variables('storageAccountName')]"
         }
     }
 }
