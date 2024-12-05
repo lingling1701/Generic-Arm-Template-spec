@@ -61,7 +61,7 @@
             "type": "Microsoft.Devices/provisioningServices",
             "apiVersion": "2021-10-01",
             "name": "[variables('dpsName')]",
-            "location": "[parameters('location')]",
+            "location": "westeurope",
             "sku": {
                 "name": "F1",
                 "capacity": 1
