@@ -29,57 +29,56 @@
         "dpsName": "[concat(parameters('iotHubName'), '-dps')]"
     },
     "resources": [
-    {
-        "type": "Microsoft.Storage/storageAccounts",
-        "apiVersion": "2021-08-01",
-        "name": "[variables('storageAccountName')]",
-        "location": "[parameters('location')]",
-        "sku": {
-            "name": "Standard_LRS"
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-08-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2"
         },
-        "kind": "StorageV2"
-    },
-    {
-        "type": "Microsoft.Devices/IotHubs",
-        "apiVersion": "2021-07-02",
-        "name": "[parameters('iotHubName')]",
-        "location": "[parameters('location')]",
-        "sku": {
-            "name": "[parameters('sku')]",
-            "capacity": 1
-        },
-        "properties": {
-            "eventHubEndpoints": {
-                "events": {
-                    "retentionTimeInDays": 1,
-                    "partitionCount": 4
+        {
+            "type": "Microsoft.Devices/IotHubs",
+            "apiVersion": "2021-07-02",
+            "name": "[parameters('iotHubName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('sku')]",
+                "capacity": 1
+            },
+            "properties": {
+                "eventHubEndpoints": {
+                    "events": {
+                        "retentionTimeInDays": 1,
+                        "partitionCount": 4
+                    }
                 }
             }
-        }
-    },
-    {
-        "type": "Microsoft.Devices/provisioningServices",
-        "apiVersion": "2021-10-01",
-        "name": "[variables('dpsName')]",
-        "location": "[parameters('location')]",
-        "sku": {
-            "name": "F1",
-            "capacity": 1
         },
-        "properties": {
-            "iotHubs": [
-                {
-                    "connectionString": "[concat('HostName=', parameters('iotHubName'), '.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=', listKeys(resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName')), '2021-07-02').value[0].primaryKey)]",
-                    "location": "[parameters('location')]"
-                }
+        {
+            "type": "Microsoft.Devices/provisioningServices",
+            "apiVersion": "2021-10-01",
+            "name": "[variables('dpsName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "F1",
+                "capacity": 1
+            },
+            "properties": {
+                "iotHubs": [
+                    {
+                        "connectionString": "[concat('HostName=', parameters('iotHubName'), '.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=', listKeys(resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName')), '2021-07-02').value[0].primaryKey)]",
+                        "location": "[parameters('location')]"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]"
             ]
-        },
-        "dependsOn": [
-            "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]"
-        ]
-    }
-]
-
+        }
+    ],
     "outputs": {
         "iotHubConnectionString": {
             "type": "string",
