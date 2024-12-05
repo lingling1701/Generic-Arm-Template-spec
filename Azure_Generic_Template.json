@@ -25,20 +25,10 @@
         }
     },
     "variables": {
-        "storageAccountName": "[substring(concat(toLower(replace(parameters('iotHubName'), '-', '')), 'storage'), 0, 24)]",
-        "dpsName": "[concat(parameters('iotHubName'), '-dps')]"
+        "storageAccountName": "[concat('st', substring(uniqueString(resourceGroup().id), 0, 22))]",
+    "dpsName": "[concat(parameters('iotHubName'), '-dps')]"
     },
     "resources": [
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2021-08-01",
-            "name": "[variables('storageAccountName')]",
-            "location": "[parameters('location')]",
-            "sku": {
-                "name": "Standard_LRS"
-            },
-            "kind": "StorageV2"
-        },
         {
             "type": "Microsoft.Devices/IotHubs",
             "apiVersion": "2021-07-02",
@@ -56,6 +46,16 @@
                     }
                 }
             }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-08-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2"
         },
         {
             "type": "Microsoft.Devices/provisioningServices",
