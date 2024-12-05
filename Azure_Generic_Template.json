@@ -25,7 +25,7 @@
         }
     },
     "variables": {
-        "storageAccountName": ""[concat(parameters('iotHubName'), 'storage')]",
+        "storageAccountName": "[concat(parameters('iotHubName'), 'storage')]",
         "dpsName": "[concat(parameters('iotHubName'), '-dps')]"
     },
     "resources": [
