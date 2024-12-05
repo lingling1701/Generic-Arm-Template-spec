@@ -42,7 +42,7 @@
                 "eventHubEndpoints": {
                     "events": {
                         "retentionTimeInDays": 1,
-                        "partitionCount": 4
+                        "partitionCount": 2
                     }
                 }
             }
