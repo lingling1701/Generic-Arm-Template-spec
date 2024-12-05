@@ -79,6 +79,7 @@
         ]
     }
 ]
+
     "outputs": {
         "iotHubConnectionString": {
             "type": "string",
