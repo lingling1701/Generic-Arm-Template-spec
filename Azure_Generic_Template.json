@@ -68,20 +68,20 @@
             },
             "resources": [
                 {
-                    "type": "eventHubEndpoints/ConsumerGroups",
+                    "type": "Microsoft.Devices/IotHubs/eventHubEndpoints/ConsumerGroups",
                     "apiVersion": "2021-03-31",
                     "name": "[concat('events/', variables('consumerGroupName'))]",
                     "dependsOn": [
                         "[concat('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
                     ],
                     "properties": {
-                         "description": "Consumer group for event processing"
+                        "description": "Consumer group for event processing"
                     }
                 },
                 {
-                    "type": "devices",
+                    "type": "Microsoft.Devices/IotHubs/devices",
                     "apiVersion": "2021-03-31",
-                    "name": "[parameters('deviceName')]",
+                    "name": "[concat(variables('iotHubName'), '/', parameters('deviceName'))]",
                     "dependsOn": [
                         "[concat('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
                     ],
