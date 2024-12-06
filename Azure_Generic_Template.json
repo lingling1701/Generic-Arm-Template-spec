@@ -4,7 +4,7 @@
     "parameters": {
         "projectName": {
             "type": "string",
-            "defaultValue": "My Test Project",
+            "defaultValue": "MyTestProject",
             "metadata": {
                 "description": "The name of the project"
             }
@@ -40,9 +40,12 @@
     },
     "variables": {
         "sanitizedProjectName": "[toLower(replace(parameters('projectName'), ' ', ''))]",
-        "iotHubName": "[concat(variables('sanitizedProjectName'), 'hub')]",
-        "storageAccountName": "[substring(concat(variables('sanitizedProjectName'), uniqueString(resourceGroup().id)), 0, 24)]",
-        "consumerGroupName": "[concat(variables('iotHubName'), '-cg')]"
+        "iotHubWord": "hub",
+        "storageWord": "store",
+        "iotHubName": "[concat(variables('sanitizedProjectName'), variables('iotHubWord'))]",
+        "storageAccountName": "[substring(concat(variables('sanitizedProjectName'), variables('storageWord'), uniqueString(resourceGroup().id)), 0, 24)]",
+        "consumerGroupWord": "cg",
+        "consumerGroupName": "[concat(variables('iotHubName'), '-', variables('consumerGroupWord'))]"
     },
     "resources": [
         {
@@ -79,17 +82,14 @@
             "name": "[concat(variables('iotHubName'), '/events/', variables('consumerGroupName'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))]"
-            ],
-            "properties": {
-                "name": "[variables('consumerGroupName')]"
-            }
+            ]
         },
         {
-            "type": "Microsoft.Devices/IotHubs/devices",
+            "type": "Microsoft.Devices/IoTHubs/devices",
             "apiVersion": "2021-03-31",
             "name": "[concat(variables('iotHubName'), '/', parameters('deviceName'))]",
             "dependsOn": [
-                "[resourceId('Microsoft.Devices/iothubs', variables('iotHubName'))]"
+                "[resourceId('Microsoft.Devices/IoTHubs', variables('iotHubName'))]"
             ],
             "properties": {
                 "deviceId": "[parameters('deviceName')]",
@@ -104,7 +104,7 @@
         },
         "iotHubHostName": {
             "type": "string",
-            "value": "[reference(resourceId('Microsoft.Devices/iothubs', variables('iotHubName'))).hostName]"
+            "value": "[reference(resourceId('Microsoft.Devices/IoTHubs', variables('iotHubName'))).hostName]"
         },
         "storageAccountName": {
             "type": "string", 
