@@ -1,11 +1,12 @@
-"parameters": {
-    "projectName": {
-        "type": "string",
-        "defaultValue": "My Test Project",
-        "metadata": {
-            "description": "The name of the project"
-        }
-    },
+{
+    "parameters": {
+        "projectName": {
+            "type": "string",
+            "defaultValue": "My Test Project",
+            "metadata": {
+                "description": "The name of the project"
+            }
+        },
         "iotHubLocation": {
             "type": "string",
             "defaultValue": "westeurope",
@@ -35,12 +36,12 @@
             }
         }
     },
-   "variables": {
-    "sanitizedProjectName": "[toLower(replace(parameters('projectName'), ' ', ''))]",
-    "iotHubName": "[concat(variables('sanitizedProjectName'), 'hub')]",
-    "storageAccountName": "[concat(variables('sanitizedProjectName'), 'storage')]",
-    "consumerGroupName": "[concat(variables('iotHubName'), '-cg')]"
-},
+    "variables": {
+        "sanitizedProjectName": "[toLower(replace(parameters('projectName'), ' ', ''))]",
+        "iotHubName": "[concat(variables('sanitizedProjectName'), 'hub')]",
+        "storageAccountName": "[concat(variables('sanitizedProjectName'), 'storage')]",
+        "consumerGroupName": "[concat(variables('iotHubName'), '-cg')]"
+    },
     "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts",
@@ -108,3 +109,4 @@
             "value": "[variables('storageAccountName')]"
         }
     }
+}
