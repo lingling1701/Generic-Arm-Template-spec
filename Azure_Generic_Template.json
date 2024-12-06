@@ -2,15 +2,15 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.3",
     "parameters": {
-        "projectName": {
-            "type": "string",
-            "defaultValue": "vsCodeIoTProject",
-            "metadata": {
-                "description": "Base name for Azure resources (max 24 chars, alphanumeric only)"
-            },
-            "maxLength": 24,
-            "minLength": 3
+    "projectName": {
+        "type": "string",
+        "metadata": {
+            "description": "Short, descriptive name for the project (3-16 characters, lowercase letters, and numbers only)"
         },
+        "minLength": 3,
+        "maxLength": 16
+    }
+},
         "iotHubLocation": {
             "type": "string",
             "defaultValue": "westeurope",
@@ -40,12 +40,12 @@
             }
         }
     },
-    "variables": {
-        "sanitizedProjectName": "[toLower(replace(parameters('projectName'), ' ', ''))]",
-        "iotHubName": "[substring(concat(variables('sanitizedProjectName'), 'hub')), 0, 24)]",
-        "storageAccountName": "[substring(concat(variables('sanitizedProjectName'), 'storage'), 0, 24)]",
-        "consumerGroupName": "[concat(variables('iotHubName'), '-cg')]"
-    },
+   "variables": {
+    "sanitizedProjectName": "[toLower(replace(parameters('projectName'), ' ', ''))]",
+    "iotHubName": "[concat(variables('sanitizedProjectName'), 'hub')]",
+    "storageAccountName": "[concat(variables('sanitizedProjectName'), 'storage')]",
+    "consumerGroupName": "[concat(variables('iotHubName'), '-cg')]"
+},
     "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts",
