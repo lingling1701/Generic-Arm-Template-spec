@@ -41,7 +41,7 @@
     "variables": {
         "sanitizedProjectName": "[toLower(replace(parameters('projectName'), ' ', ''))]",
         "iotHubName": "[concat(variables('sanitizedProjectName'), 'hub')]",
-        "storageAccountName": "[concat(variables('sanitizedProjectName'), 'storage')]",
+        "storageAccountName": "[concat(variables('sanitizedProjectName'), uniqueString(resourceGroup().id))]",
         "consumerGroupName": "[concat(variables('iotHubName'), '-cg')]"
     },
     "resources": [
