@@ -70,7 +70,7 @@
                 {
                     "type": "Microsoft.Devices/IotHubs/eventHubEndpoints/ConsumerGroups",
                     "apiVersion": "2021-03-31",
-                    "name": "[concat('events/', variables('consumerGroupName'))]",
+                    "name": "[concat('eventHubEndpoints/events/', variables('consumerGroupName'))]",
                     "dependsOn": [
                         "[concat('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
                     ],
