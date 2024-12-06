@@ -1,14 +1,10 @@
-{
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.3",
-    "parameters": {
+"parameters": {
     "projectName": {
         "type": "string",
+        "defaultValue": "My Test Project",
         "metadata": {
-            "description": "Short, descriptive name for the project (3-16 characters, lowercase letters, and numbers only)"
-        },
-        "minLength": 3,
-        "maxLength": 16
+            "description": "The name of the project"
+        }
     }
 },
         "iotHubLocation": {
