@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.2",
+    "contentVersion": "1.0.0.3",
     "parameters": {
         "projectName": {
             "type": "string",
@@ -42,9 +42,9 @@
     },
     "variables": {
         "sanitizedProjectName": "[toLower(replace(parameters('projectName'), ' ', ''))]",
-        "iotHubName": "[substring(concat(variables('sanitizedProjectName'), 'hub', uniqueString(resourceGroup().id)), 0, 24)]",
-        "storageAccountName": "[substring(concat(variables('sanitizedProjectName'), 'store', uniqueString(resourceGroup().id)), 0, 24)]",
-        "consumerGroupName": "[concat('consumergroup', uniqueString(resourceGroup().id))]"
+        "iotHubName": "[substring(concat(variables('sanitizedProjectName'), 'hub'), 0, 24)]",
+        "storageAccountName": "[substring(concat(variables('sanitizedProjectName'), 'storage'), 0, 24)]",
+        "consumerGroupName": "[concat(variables('iotHubName'), '-cg')]"
     },
     "resources": [
         {
@@ -81,15 +81,22 @@
             "name": "[concat(variables('iotHubName'), '/events/', variables('consumerGroupName'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))]"
-            ]
+            ],
+            "properties": {
+                "name": "[variables('consumerGroupName')]"
+            }
         },
         {
-            "type": "Microsoft.Devices/iothubs/devices",
+            "type": "Microsoft.Devices/IotHubs/devices",
             "apiVersion": "2021-03-31",
             "name": "[concat(variables('iotHubName'), '/', parameters('deviceName'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Devices/iothubs', variables('iotHubName'))]"
-            ]
+            ],
+            "properties": {
+                "deviceId": "[parameters('deviceName')]",
+                "status": "enabled"
+            }
         }
     ],
     "outputs": {
