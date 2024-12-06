@@ -32,17 +32,18 @@
         "deviceName": {
             "type": "string",
             "defaultValue": "VSCodeDevice",
-            "maxLength": 128,
             "metadata": {
                 "description": "Name of the IoT device"
-            }
+            },
+            "maxLength": 128,
+            "minLength": 1 // Added this to ensure a valid device name
         }
     },
     "variables": {
         "sanitizedProjectName": "[toLower(replace(parameters('projectName'), ' ', ''))]",
         "iotHubWord": "hub",
         "storageWord": "store",
-        "iotHubName": "[concat(variables('sanitizedProjectName'), variables('iotHubWord'))]",
+        "iotHubName": "[if(empty(variables('sanitizedProjectName')), 'defaultHubName', concat(variables('sanitizedProjectName'), variables('iotHubWord')))]",
         "storageAccountName": "[substring(concat(variables('sanitizedProjectName'), variables('storageWord'), uniqueString(resourceGroup().id)), 0, 24)]",
         "consumerGroupWord": "cg",
         "consumerGroupName": "[concat(variables('iotHubName'), '-', variables('consumerGroupWord'))]"
@@ -85,11 +86,11 @@
             ]
         },
         {
-            "type": "Microsoft.Devices/IoTHubs/devices",
+            "type": "Microsoft.Devices/IotHubs/devices",
             "apiVersion": "2021-03-31",
             "name": "[concat(variables('iotHubName'), '/', parameters('deviceName'))]",
             "dependsOn": [
-                "[resourceId('Microsoft.Devices/IoTHubs', variables('iotHubName'))]"
+                "[resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))]"
             ],
             "properties": {
                 "deviceId": "[parameters('deviceName')]",
@@ -102,9 +103,13 @@
             "type": "string",
             "value": "[variables('iotHubName')]"
         },
+        "consumerGroupName": {
+            "type": "string",
+            "value": "[variables('consumerGroupName')]"
+        },
         "iotHubHostName": {
             "type": "string",
-            "value": "[reference(resourceId('Microsoft.Devices/IoTHubs', variables('iotHubName'))).hostName]"
+            "value": "[reference(resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))).hostName]"
         },
         "storageAccountName": {
             "type": "string", 
