@@ -108,4 +108,3 @@
             "value": "[variables('storageAccountName')]"
         }
     }
-}
