@@ -74,7 +74,9 @@
                     "dependsOn": [
                         "[concat('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
                     ],
-                    "properties": {}
+                    "properties": {
+                         "description": "Consumer group for event processing"
+                    }
                 },
                 {
                     "type": "devices",
