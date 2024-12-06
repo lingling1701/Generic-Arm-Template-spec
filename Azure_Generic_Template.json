@@ -36,7 +36,7 @@
                 "description": "Name of the IoT device"
             },
             "maxLength": 128,
-            "minLength": 1 // Added this to ensure a valid device name
+            "minLength": 1
         }
     },
     "variables": {
@@ -49,16 +49,6 @@
         "consumerGroupName": "[concat(variables('iotHubName'), '-', variables('consumerGroupWord'))]"
     },
     "resources": [
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2021-04-01",
-            "name": "[variables('storageAccountName')]",
-            "location": "[parameters('iotHubLocation')]",
-            "sku": {
-                "name": "Standard_LRS"
-            },
-            "kind": "StorageV2"
-        },
         {
             "type": "Microsoft.Devices/IotHubs",
             "apiVersion": "2021-03-31",
@@ -75,27 +65,40 @@
                         "partitionCount": 2
                     }
                 }
-            }
-        },
-        {
-            "type": "Microsoft.Devices/IotHubs/eventHubEndpoints/ConsumerGroups",
-            "apiVersion": "2021-03-31",
-            "name": "[concat(variables('iotHubName'), '/events/', variables('consumerGroupName'))]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))]"
+            },
+            "resources": [
+                {
+                    "type": "eventHubEndpoints/ConsumerGroups",
+                    "apiVersion": "2021-03-31",
+                    "name": "[concat('events/', variables('consumerGroupName'))]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
+                    ],
+                    "properties": {}
+                },
+                {
+                    "type": "devices",
+                    "apiVersion": "2021-03-31",
+                    "name": "[parameters('deviceName')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
+                    ],
+                    "properties": {
+                        "deviceId": "[parameters('deviceName')]",
+                        "status": "enabled"
+                    }
+                }
             ]
         },
         {
-            "type": "Microsoft.Devices/IotHubs/devices",
-            "apiVersion": "2021-03-31",
-            "name": "[concat(variables('iotHubName'), '/', parameters('deviceName'))]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))]"
-            ],
-            "properties": {
-                "deviceId": "[parameters('deviceName')]",
-                "status": "enabled"
-            }
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-04-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('iotHubLocation')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2"
         }
     ],
     "outputs": {
@@ -112,7 +115,7 @@
             "value": "[reference(resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))).hostName]"
         },
         "storageAccountName": {
-            "type": "string", 
+            "type": "string",
             "value": "[variables('storageAccountName')]"
         }
     }
