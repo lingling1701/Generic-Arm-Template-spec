@@ -5,8 +5,7 @@
         "metadata": {
             "description": "The name of the project"
         }
-    }
-},
+    },
         "iotHubLocation": {
             "type": "string",
             "defaultValue": "westeurope",
