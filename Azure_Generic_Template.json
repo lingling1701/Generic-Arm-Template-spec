@@ -62,35 +62,17 @@
                 "eventHubEndpoints": {
                     "events": {
                         "retentionTimeInDays": 1,
-                        "partitionCount": 2
+                        "partitionCount": 2,
+                        "consumerGroups": {
+                            "[variables('consumerGroupName')]": {
+                                "properties": {
+                                    "description": "Consumer group for event processing"
+                                }
+                            }
+                        }
                     }
                 }
-            },
-            "resources": [
-                {
-                    "type": "Microsoft.Devices/IotHubs/eventHubEndpoints/ConsumerGroups",
-                    "apiVersion": "2021-03-31",
-                    "name": "[concat('eventHubEndpoints/events/', variables('consumerGroupName'))]",
-                    "dependsOn": [
-                        "[concat('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
-                    ],
-                    "properties": {
-                        "description": "Consumer group for event processing"
-                    }
-                },
-                {
-                    "type": "Microsoft.Devices/IotHubs/devices",
-                    "apiVersion": "2021-03-31",
-                    "name": "[concat(variables('iotHubName'), '/', parameters('deviceName'))]",
-                    "dependsOn": [
-                        "[concat('Microsoft.Devices/IotHubs/', variables('iotHubName'))]"
-                    ],
-                    "properties": {
-                        "deviceId": "[parameters('deviceName')]",
-                        "status": "enabled"
-                    }
-                }
-            ]
+            }
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
