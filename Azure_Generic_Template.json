@@ -42,7 +42,7 @@
     },
     "variables": {
         "sanitizedProjectName": "[toLower(replace(parameters('projectName'), ' ', ''))]",
-        "iotHubName": "[substring(concat(variables('sanitizedProjectName'), 'hub'), 0, 24)]",
+        "iotHubName": "[substring(concat(variables('sanitizedProjectName'), 'hub')), 0, 24)]",
         "storageAccountName": "[substring(concat(variables('sanitizedProjectName'), 'storage'), 0, 24)]",
         "consumerGroupName": "[concat(variables('iotHubName'), '-cg')]"
     },
